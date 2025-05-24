@@ -10,8 +10,7 @@ import {
   Settings, 
   ExternalLink, 
   Copy, 
-  CheckCircle,
-  type LucideIcon 
+  CheckCircle
 } from 'lucide-react'
 
 const API_BASE_URL = 'https://get-site-styles-api.onrender.com'
