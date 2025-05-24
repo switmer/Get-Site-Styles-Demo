@@ -2,7 +2,17 @@
 
 // Force redeploy - Updated with full demo interface
 import { useState, useEffect } from 'react'
-import { Search, Download, Code, Palette, Settings, ExternalLink, Copy, CheckCircle } from 'lucide-react'
+import { 
+  Search, 
+  Download, 
+  Code, 
+  Palette, 
+  Settings, 
+  ExternalLink, 
+  Copy, 
+  CheckCircle,
+  type LucideIcon 
+} from 'lucide-react'
 
 const API_BASE_URL = 'https://get-site-styles-api.onrender.com'
 const DEMO_API_KEY = 'gss_mb1r5n49_918ec955cf99e9bd8aba34c790659eeb'
@@ -274,7 +284,7 @@ export default function Home() {
                     <div className="flex items-center gap-2">
                       <ExternalLink className="w-5 h-5 text-purple-600" />
                       <span className="font-medium text-sm">
-                        {new URL(result.input.url).hostname}
+                        {result.input?.url ? new URL(result.input.url).hostname : 'Unknown'}
                       </span>
                     </div>
                     <button
