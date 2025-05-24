@@ -1,5 +1,6 @@
 'use client'
 
+// Force redeploy - Updated with full demo interface
 import { useState, useEffect } from 'react'
 import { Search, Download, Code, Palette, Settings, ExternalLink, Copy, CheckCircle } from 'lucide-react'
 
