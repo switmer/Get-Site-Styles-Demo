@@ -1,11 +1,7 @@
 import React from 'react';
 import { PlusIcon, TrashIcon, LoaderIcon, ChevronRightIcon } from 'lucide-react';
 
-interface ButtonsPreviewProps {
-  // Optional theme prop for future use
-}
-
-const ButtonsPreview: React.FC<ButtonsPreviewProps> = () => {
+const ButtonsPreview: React.FC = () => {
   return (
     <div className="space-y-8">
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
