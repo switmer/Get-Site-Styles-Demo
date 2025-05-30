@@ -13,6 +13,16 @@ import {
   CheckCircle
 } from 'lucide-react'
 
+// Type assertion for React 19 compatibility
+const IconPalette = Palette as React.FC<{ className?: string }>
+const IconSearch = Search as React.FC<{ className?: string }>
+const IconDownload = Download as React.FC<{ className?: string }>
+const IconCode = Code as React.FC<{ className?: string }>
+const IconSettings = Settings as React.FC<{ className?: string }>
+const IconExternalLink = ExternalLink as React.FC<{ className?: string }>
+const IconCopy = Copy as React.FC<{ className?: string }>
+const IconCheckCircle = CheckCircle as React.FC<{ className?: string }>
+
 const API_BASE_URL = 'https://get-site-styles-api.onrender.com'
 const DEMO_API_KEY = 'gss_mb1r5n49_918ec955cf99e9bd8aba34c790659eeb'
 
@@ -132,7 +142,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Palette className="w-5 h-5 text-white" />
+                <IconPalette className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                 Get-Site-Styles API
@@ -154,7 +164,7 @@ export default function Home() {
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Search className="w-5 h-5 text-blue-600" />
+                <IconSearch className="w-5 h-5 text-blue-600" />
                 <h2 className="text-lg font-semibold">Website Analysis</h2>
               </div>
 
@@ -207,7 +217,7 @@ export default function Home() {
               {/* Options */}
               <div className="space-y-4 mt-6 pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-gray-600" />
+                  <IconSettings className="w-4 h-4 text-gray-600" />
                   <h3 className="font-medium text-sm">Options</h3>
                 </div>
 
@@ -254,7 +264,7 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <Download className="w-4 h-4" />
+                    <IconDownload className="w-4 h-4" />
                     Analyze Website
                   </>
                 )}
@@ -266,7 +276,7 @@ export default function Home() {
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Code className="w-5 h-5 text-green-600" />
+                <IconCode className="w-5 h-5 text-green-600" />
                 <h2 className="text-lg font-semibold">Results</h2>
               </div>
 
@@ -281,7 +291,7 @@ export default function Home() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <ExternalLink className="w-5 h-5 text-purple-600" />
+                      <IconExternalLink className="w-5 h-5 text-purple-600" />
                       <span className="font-medium text-sm">
                         {result.input?.url ? new URL(result.input.url).hostname : 'Unknown'}
                       </span>
@@ -290,7 +300,7 @@ export default function Home() {
                       onClick={() => copyToClipboard(formatResultDisplay())}
                       className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
                     >
-                      {copied ? <CheckCircle className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                      {copied ? <IconCheckCircle className="w-4 h-4 text-green-600" /> : <IconCopy className="w-4 h-4" />}
                       {copied ? 'Copied!' : 'Copy'}
                     </button>
                   </div>
@@ -324,7 +334,7 @@ export default function Home() {
 
               {!result && !loading && !error && (
                 <div className="text-center py-12">
-                  <Palette className="w-12 h-12 mb-4 text-gray-300 mx-auto" />
+                  <IconPalette className="w-12 h-12 mb-4 text-gray-300 mx-auto" />
                   <p className="text-gray-500 mb-2">No analysis yet</p>
                   <p className="text-sm text-gray-400">
                     Enter a URL and click &quot;Analyze Website&quot; to extract design tokens
