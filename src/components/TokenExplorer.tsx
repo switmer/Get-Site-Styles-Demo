@@ -2,16 +2,28 @@ import React from 'react';
 import { PaletteIcon, TypeIcon, RulerIcon, CircleIcon } from 'lucide-react';
 
 interface TokenExplorerProps {
-  analysisData: any;
-  isDarkMode: boolean;
-  colorFormat: string;
+  analysisData: {
+    meta?: {
+      source?: string;
+    };
+    data?: {
+      tokens?: {
+        colors?: {
+          frequency?: Array<{ value: string; count: number; prevalence: number }>;
+        };
+        fontFamilies?: {
+          frequency?: Array<{ value: string; count: number; prevalence: number }>;
+        };
+        spacing?: {
+          frequency?: Array<{ value: string; count: number; prevalence: number }>;
+        };
+        customProperties?: Record<string, unknown>;
+      };
+    };
+  } | null;
 }
 
-const TokenExplorer: React.FC<TokenExplorerProps> = ({
-  analysisData,
-  isDarkMode,
-  colorFormat
-}) => {
+const TokenExplorer: React.FC<TokenExplorerProps> = ({ analysisData }) => {
   if (!analysisData) {
     return (
       <div className="text-center py-12">
@@ -49,7 +61,7 @@ const TokenExplorer: React.FC<TokenExplorerProps> = ({
             </span>
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {analysisData.data?.tokens?.colors?.frequency?.slice(0, 10).map((color: any, index: number) => (
+            {analysisData.data?.tokens?.colors?.frequency?.slice(0, 10).map((color, index: number) => (
               <div key={index} className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
                 <div 
                   className="w-6 h-6 rounded border border-gray-200 dark:border-gray-600 flex-shrink-0"
@@ -78,7 +90,7 @@ const TokenExplorer: React.FC<TokenExplorerProps> = ({
             </span>
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {analysisData.data?.tokens?.fontFamilies?.frequency?.slice(0, 8).map((font: any, index: number) => (
+            {analysisData.data?.tokens?.fontFamilies?.frequency?.slice(0, 8).map((font, index: number) => (
               <div key={index} className="p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
                 <div className="text-sm font-mono text-gray-900 dark:text-gray-100 truncate">
                   {font.value}
@@ -101,7 +113,7 @@ const TokenExplorer: React.FC<TokenExplorerProps> = ({
             </span>
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {analysisData.data?.tokens?.spacing?.frequency?.slice(0, 10).map((space: any, index: number) => (
+            {analysisData.data?.tokens?.spacing?.frequency?.slice(0, 10).map((space, index: number) => (
               <div key={index} className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
                 <div 
                   className="bg-blue-200 dark:bg-blue-800 flex-shrink-0"
@@ -130,13 +142,13 @@ const TokenExplorer: React.FC<TokenExplorerProps> = ({
             </span>
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {Object.entries(analysisData.data?.tokens?.customProperties || {}).slice(0, 10).map(([key, value]: [string, any], index: number) => (
+            {Object.entries(analysisData.data?.tokens?.customProperties || {}).slice(0, 10).map(([key, value], index: number) => (
               <div key={index} className="p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
                 <div className="text-sm font-mono text-gray-900 dark:text-gray-100 truncate">
                   {key}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {value}
+                  {String(value)}
                 </div>
               </div>
             ))}
