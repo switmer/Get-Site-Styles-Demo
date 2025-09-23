@@ -124,13 +124,56 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const colorRegex = /^(#([0-9a-fA-F]{3,8})|rgba?\(|hsla?\(|oklch\(|lab\(|lch\()/
+
+  function deriveColors(data: any): Record<string, string> {
+    if (!data) return {}
+    // Case 1: direct map
+    if (data.colors && typeof data.colors === 'object' && !Array.isArray(data.colors)) {
+      const entries = Object.entries(data.colors).filter(([, v]) => typeof v === 'string' && colorRegex.test(String(v)))
+      if (entries.length) return Object.fromEntries(entries)
+    }
+    // Case 2: tokens.colors array
+    const tokenArray = data.tokens?.colors
+    if (Array.isArray(tokenArray) && tokenArray.length) {
+      return Object.fromEntries(tokenArray.slice(0, 48).map((v: string, i: number) => [
+        `color-${String(i + 1).padStart(2, '0')}`,
+        v,
+      ]))
+    }
+    // Case 3: theme variables (light or dark)
+    const themeVars = (data.theme?.light ?? data.theme ?? {}) as Record<string, string>
+    const themed = Object.entries(themeVars)
+      .filter(([k, v]) => typeof v === 'string' && colorRegex.test(v) && /^(--|primary|secondary|accent|muted|foreground|background|border|ring|chart)/.test(k))
+      .slice(0, 48)
+    if (themed.length) return Object.fromEntries(themed)
+    // Case 4: parse CSS string for custom properties
+    if (typeof data.css === 'string') {
+      const matches = Array.from(data.css.matchAll(/--([a-z0-9-]+):\s*([^;]+);/gi))
+      const picked = matches
+        .map((m) => [`--${m[1]}`, m[2].trim()] as const)
+        .filter(([, v]) => colorRegex.test(v))
+        .slice(0, 48)
+      if (picked.length) return Object.fromEntries(picked)
+    }
+    // Case 5: colorAnalysis
+    const analysis = data?.colorAnalysis
+    if (Array.isArray(analysis) && analysis.length) {
+      return Object.fromEntries(analysis.slice(0, 48).map((c: any, i: number) => [
+        `color-${String(i + 1).padStart(2, '0')}`,
+        typeof c === 'string' ? c : c?.color,
+      ]).filter(([, v]) => typeof v === 'string' && colorRegex.test(v)))
+    }
+    return {}
+  }
+
   const formatResultDisplay = () => {
     if (!result) return ''
-    
+
     if (format === 'shadcn') {
       return result.data.css || JSON.stringify(result.data, null, 2)
     }
-    
+
     return JSON.stringify(result.data, null, 2)
   }
 
