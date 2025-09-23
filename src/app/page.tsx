@@ -92,11 +92,10 @@ export default function Home() {
     setResult(null)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': DEMO_API_KEY
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           url,
