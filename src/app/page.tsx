@@ -2,16 +2,17 @@
 
 // Force redeploy - Updated with full demo interface
 import { useState, useEffect } from 'react'
-import { 
-  Search, 
-  Download, 
-  Code, 
-  Palette, 
-  Settings, 
-  ExternalLink, 
-  Copy, 
+import {
+  Search,
+  Download,
+  Code,
+  Palette,
+  Settings,
+  ExternalLink,
+  Copy,
   CheckCircle
 } from 'lucide-react'
+import ThemeToggle from '@/components/ThemeToggle'
 
 // Type assertion for React 19 compatibility
 const IconPalette = Palette as React.FC<{ className?: string }>
@@ -157,7 +158,7 @@ export default function Home() {
             {/**/}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {/* injected component */}
-            {require("@/components/ThemeToggle").default && require("@/components/ThemeToggle").default()}
+            <ThemeToggle />
           </div>
           <p className="text-gray-600 mt-2 dark:text-gray-300">
             Extract design tokens from any website and convert them to your preferred format
