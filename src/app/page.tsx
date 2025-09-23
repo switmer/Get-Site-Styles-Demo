@@ -360,25 +360,30 @@ export default function Home() {
                   </div>
 
                   {/* Color Preview */}
-                  {result.data?.colors && (
-                    <div className="mt-4">
-                      <h4 className="font-medium text-sm mb-2">Color Palette Preview</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(result.data.colors).slice(0, 12).map(([name, value]) => (
-                          <div key={name} className="flex flex-col items-center">
-                            <div
-                              className="w-8 h-8 rounded border shadow-sm"
-                              style={{ backgroundColor: String(value) }}
-                              title={`${name}: ${String(value)}`}
-                            />
-                            <span className="text-xs text-gray-600 dark:text-gray-400 mt-1 max-w-16 truncate">
-                              {name}
-                            </span>
-                          </div>
-                        ))}
+                  {(() => {
+                    const palette = deriveColors(result.data)
+                    const entries = Object.entries(palette).slice(0, 24)
+                    if (!entries.length) return null
+                    return (
+                      <div className="mt-4">
+                        <h4 className="font-medium text-sm mb-2">Color Palette Preview</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {entries.map(([name, value]) => (
+                            <div key={name} className="flex flex-col items-center">
+                              <div
+                                className="w-8 h-8 rounded border shadow-sm"
+                                style={{ backgroundColor: String(value) }}
+                                title={`${name}: ${String(value)}`}
+                              />
+                              <span className="text-xs text-gray-600 dark:text-gray-400 mt-1 max-w-16 truncate">
+                                {name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )
+                  })()}
                 </div>
               )}
 
