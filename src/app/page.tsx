@@ -135,24 +135,31 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-950">
       {/* Header */}
-      <header className="border-b bg-white/70 backdrop-blur-sm">
+      <header className="border-b bg-white/70 backdrop-blur-sm dark:bg-gray-900/70 dark:border-gray-800">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <IconPalette className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <IconPalette className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
+                  Get-Site-Styles API
+                </h1>
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                Get-Site-Styles API
-              </h1>
+              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full dark:bg-green-900/40 dark:text-green-300">
+                LIVE DEMO
+              </span>
             </div>
-            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-              LIVE DEMO
-            </span>
+            {/* Theme toggle */}
+            {/**/}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* injected component */}
+            {require("@/components/ThemeToggle").default && require("@/components/ThemeToggle").default()}
           </div>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 dark:text-gray-300">
             Extract design tokens from any website and convert them to your preferred format
           </p>
         </div>
@@ -162,7 +169,7 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Input Panel */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6 dark:bg-gray-900 dark:border-gray-800">
               <div className="flex items-center gap-2 mb-4">
                 <IconSearch className="w-5 h-5 text-blue-600" />
                 <h2 className="text-lg font-semibold">Website Analysis</h2>
@@ -170,20 +177,20 @@ export default function Home() {
 
               {/* URL Input */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Website URL</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Website URL</label>
                 <input
                   type="url"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 placeholder:text-gray-400"
                 />
                 <div className="flex flex-wrap gap-2">
                   {exampleUrls.map((exampleUrl) => (
                     <button
                       key={exampleUrl}
                       onClick={() => setUrl(exampleUrl)}
-                      className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors"
+                      className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                       {exampleUrl.replace('https://', '')}
                     </button>
@@ -193,7 +200,7 @@ export default function Home() {
 
               {/* Format Selection */}
               <div className="space-y-2 mt-4">
-                <label className="text-sm font-medium text-gray-700">Output Format</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Output Format</label>
                 <div className="space-y-2">
                   {formatOptions.map((option) => (
                     <label key={option.value} className="flex items-start gap-2 cursor-pointer">
@@ -207,7 +214,7 @@ export default function Home() {
                       />
                       <div>
                         <div className="font-medium text-sm">{option.label}</div>
-                        <div className="text-xs text-gray-500">{option.description}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{option.description}</div>
                       </div>
                     </label>
                   ))}
@@ -215,19 +222,19 @@ export default function Home() {
               </div>
 
               {/* Options */}
-              <div className="space-y-4 mt-6 pt-4 border-t">
+              <div className="space-y-4 mt-6 pt-4 border-t dark:border-gray-800">
                 <div className="flex items-center gap-2">
-                  <IconSettings className="w-4 h-4 text-gray-600" />
+                  <IconSettings className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                   <h3 className="font-medium text-sm">Options</h3>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Color Format</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Color Format</label>
                     <select
                       value={colorFormat}
                       onChange={(e) => setColorFormat(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                     >
                       {colorFormatOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -245,7 +252,7 @@ export default function Home() {
                         onChange={(e) => setCompact(e.target.checked)}
                         className="rounded"
                       />
-                      <span className="text-sm font-medium text-gray-700">Compact Output</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Compact Output</span>
                     </label>
                   </div>
                 </div>
@@ -274,14 +281,14 @@ export default function Home() {
 
           {/* Results Panel */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6 dark:bg-gray-900 dark:border-gray-800">
               <div className="flex items-center gap-2 mb-4">
                 <IconCode className="w-5 h-5 text-green-600" />
                 <h2 className="text-lg font-semibold">Results</h2>
               </div>
 
               {error && (
-                <div className="p-4 bg-red-50 text-red-700 rounded-md mb-4">
+                <div className="p-4 bg-red-50 text-red-700 rounded-md mb-4 dark:bg-red-900/30 dark:text-red-300">
                   <p className="font-medium">Error:</p>
                   <p className="text-sm">{error}</p>
                 </div>
@@ -298,7 +305,7 @@ export default function Home() {
                     </div>
                     <button
                       onClick={() => copyToClipboard(formatResultDisplay())}
-                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                     >
                       {copied ? <IconCheckCircle className="w-4 h-4 text-green-600" /> : <IconCopy className="w-4 h-4" />}
                       {copied ? 'Copied!' : 'Copy'}
@@ -321,7 +328,7 @@ export default function Home() {
                               style={{ backgroundColor: String(value) }}
                               title={`${name}: ${String(value)}`}
                             />
-                            <span className="text-xs text-gray-600 mt-1 max-w-16 truncate">
+                            <span className="text-xs text-gray-600 dark:text-gray-400 mt-1 max-w-16 truncate">
                               {name}
                             </span>
                           </div>
@@ -335,7 +342,7 @@ export default function Home() {
               {!result && !loading && !error && (
                 <div className="text-center py-12">
                   <IconPalette className="w-12 h-12 mb-4 text-gray-300 mx-auto" />
-                  <p className="text-gray-500 mb-2">No analysis yet</p>
+                  <p className="text-gray-500 mb-2 dark:text-gray-400">No analysis yet</p>
                   <p className="text-sm text-gray-400">
                     Enter a URL and click &quot;Analyze Website&quot; to extract design tokens
                   </p>
