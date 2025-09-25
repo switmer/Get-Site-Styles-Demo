@@ -124,31 +124,43 @@ export default function Home() {
 
   const colorRegex = /^(#([0-9a-fA-F]{3,8})|rgba?\(|hsla?\(|oklch\(|lab\(|lch\()/
 
+  function isRecord(v: unknown): v is Record<string, unknown> {
+    return typeof v === 'object' && v !== null && !Array.isArray(v)
+  }
+
   function deriveColors(data: unknown): Record<string, string> {
-    if (!data) return {}
-    // Case 1: direct map
-    const d = data as any
-    if (d?.colors && typeof d.colors === 'object' && !Array.isArray(d.colors)) {
-      const entries = Object.entries(d.colors).filter(([, v]) => typeof v === 'string' && colorRegex.test(String(v)))
+    if (!data || !isRecord(data)) return {}
+
+    // Case 1: direct map at data.colors
+    if (isRecord(data.colors)) {
+      const entries = Object.entries(data.colors).filter(([, v]) => typeof v === 'string' && colorRegex.test(String(v))) as Array<[string, string]>
       if (entries.length) return Object.fromEntries(entries)
     }
+
     // Case 2: tokens.colors array
-    const tokenArray = (d?.tokens as any)?.colors
+    const tokens = isRecord(data.tokens) ? data.tokens : undefined
+    const tokenArray = Array.isArray(tokens?.colors) ? (tokens!.colors as unknown[]) : null
     if (Array.isArray(tokenArray) && tokenArray.length) {
-      return Object.fromEntries(tokenArray.slice(0, 48).map((v: string, i: number) => [
+      const arr = tokenArray.filter((v): v is string => typeof v === 'string')
+      return Object.fromEntries(arr.slice(0, 48).map((v, i) => [
         `color-${String(i + 1).padStart(2, '0')}`,
         v,
       ]))
     }
+
     // Case 3: theme variables (light or dark)
-    const themeVars = ((d?.theme as any)?.light ?? (d as any)?.theme ?? {}) as Record<string, string>
-    const themed = Object.entries(themeVars)
-      .filter(([k, v]) => typeof v === 'string' && colorRegex.test(v) && /^(--|primary|secondary|accent|muted|foreground|background|border|ring|chart)/.test(k))
-      .slice(0, 48)
-    if (themed.length) return Object.fromEntries(themed)
+    const theme = isRecord(data.theme) ? data.theme : undefined
+    const themeLight = isRecord(theme?.light) ? (theme!.light as Record<string, unknown>) : (theme as Record<string, unknown> | undefined)
+    if (themeLight) {
+      const themed = Object.entries(themeLight)
+        .filter(([k, v]) => typeof v === 'string' && colorRegex.test(String(v)) && /^(--|primary|secondary|accent|muted|foreground|background|border|ring|chart)/.test(k))
+        .slice(0, 48) as Array<[string, string]>
+      if (themed.length) return Object.fromEntries(themed)
+    }
+
     // Case 4: parse CSS string for custom properties
-    if (typeof (d as any)?.css === 'string') {
-      const css = String((d as any).css)
+    if (typeof (data as Record<string, unknown>).css === 'string') {
+      const css = String((data as Record<string, unknown>).css)
       const matches = Array.from(css.matchAll(/--([a-z0-9-]+):\s*([^;]+);/gi))
       const picked = matches
         .map((m) => [`--${m[1]}`, m[2].trim()] as const)
@@ -156,19 +168,22 @@ export default function Home() {
         .slice(0, 48)
       if (picked.length) return Object.fromEntries(picked)
     }
-    // Case 5: colorAnalysis
-    const analysis = (d as any)?.colorAnalysis
+
+    // Case 5: colorAnalysis array
+    const analysis = (data as Record<string, unknown>).colorAnalysis
     if (Array.isArray(analysis) && analysis.length) {
-      return Object.fromEntries(
-        analysis
-          .slice(0, 48)
-          .map((c: unknown, i: number) => [
-            `color-${String(i + 1).padStart(2, '0')}`,
-            typeof c === 'string' ? c : (c as { color?: string })?.color,
-          ])
-          .filter(([, v]) => typeof v === 'string' && colorRegex.test(String(v)))
-      )
+      const arr = (analysis as unknown[])
+        .map((c) => (typeof c === 'string' ? c : (isRecord(c) && typeof c.color === 'string') ? c.color : undefined))
+        .filter((v): v is string => typeof v === 'string' && colorRegex.test(v))
+        .slice(0, 48)
+      if (arr.length) {
+        return Object.fromEntries(arr.map((v, i) => [
+          `color-${String(i + 1).padStart(2, '0')}`,
+          v,
+        ]))
+      }
     }
+
     return {}
   }
 
