@@ -24,8 +24,6 @@ const IconExternalLink = ExternalLink as React.FC<{ className?: string }>
 const IconCopy = Copy as React.FC<{ className?: string }>
 const IconCheckCircle = CheckCircle as React.FC<{ className?: string }>
 
-const API_BASE_URL = 'https://get-site-styles-api.onrender.com'
-const DEMO_API_KEY = 'gss_mb1r5n49_918ec955cf99e9bd8aba34c790659eeb'
 
 interface AnalysisResult {
   data: {
@@ -126,15 +124,16 @@ export default function Home() {
 
   const colorRegex = /^(#([0-9a-fA-F]{3,8})|rgba?\(|hsla?\(|oklch\(|lab\(|lch\()/
 
-  function deriveColors(data: any): Record<string, string> {
+  function deriveColors(data: unknown): Record<string, string> {
     if (!data) return {}
     // Case 1: direct map
-    if (data.colors && typeof data.colors === 'object' && !Array.isArray(data.colors)) {
-      const entries = Object.entries(data.colors).filter(([, v]) => typeof v === 'string' && colorRegex.test(String(v)))
+    const d = data as any
+    if (d?.colors && typeof d.colors === 'object' && !Array.isArray(d.colors)) {
+      const entries = Object.entries(d.colors).filter(([, v]) => typeof v === 'string' && colorRegex.test(String(v)))
       if (entries.length) return Object.fromEntries(entries)
     }
     // Case 2: tokens.colors array
-    const tokenArray = data.tokens?.colors
+    const tokenArray = (d?.tokens as any)?.colors
     if (Array.isArray(tokenArray) && tokenArray.length) {
       return Object.fromEntries(tokenArray.slice(0, 48).map((v: string, i: number) => [
         `color-${String(i + 1).padStart(2, '0')}`,
@@ -142,14 +141,15 @@ export default function Home() {
       ]))
     }
     // Case 3: theme variables (light or dark)
-    const themeVars = (data.theme?.light ?? data.theme ?? {}) as Record<string, string>
+    const themeVars = ((d?.theme as any)?.light ?? (d as any)?.theme ?? {}) as Record<string, string>
     const themed = Object.entries(themeVars)
       .filter(([k, v]) => typeof v === 'string' && colorRegex.test(v) && /^(--|primary|secondary|accent|muted|foreground|background|border|ring|chart)/.test(k))
       .slice(0, 48)
     if (themed.length) return Object.fromEntries(themed)
     // Case 4: parse CSS string for custom properties
-    if (typeof data.css === 'string') {
-      const matches = Array.from(data.css.matchAll(/--([a-z0-9-]+):\s*([^;]+);/gi))
+    if (typeof (d as any)?.css === 'string') {
+      const css = String((d as any).css)
+      const matches = Array.from(css.matchAll(/--([a-z0-9-]+):\s*([^;]+);/gi))
       const picked = matches
         .map((m) => [`--${m[1]}`, m[2].trim()] as const)
         .filter(([, v]) => colorRegex.test(v))
@@ -157,12 +157,17 @@ export default function Home() {
       if (picked.length) return Object.fromEntries(picked)
     }
     // Case 5: colorAnalysis
-    const analysis = data?.colorAnalysis
+    const analysis = (d as any)?.colorAnalysis
     if (Array.isArray(analysis) && analysis.length) {
-      return Object.fromEntries(analysis.slice(0, 48).map((c: any, i: number) => [
-        `color-${String(i + 1).padStart(2, '0')}`,
-        typeof c === 'string' ? c : c?.color,
-      ]).filter(([, v]) => typeof v === 'string' && colorRegex.test(v)))
+      return Object.fromEntries(
+        analysis
+          .slice(0, 48)
+          .map((c: unknown, i: number) => [
+            `color-${String(i + 1).padStart(2, '0')}`,
+            typeof c === 'string' ? c : (c as { color?: string })?.color,
+          ])
+          .filter(([, v]) => typeof v === 'string' && colorRegex.test(String(v)))
+      )
     }
     return {}
   }
@@ -197,9 +202,6 @@ export default function Home() {
               </span>
             </div>
             {/* Theme toggle */}
-            {/**/}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {/* injected component */}
             <ThemeToggle />
           </div>
           <p className="text-gray-600 mt-2 dark:text-gray-300">
