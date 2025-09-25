@@ -2,16 +2,17 @@
 
 // Force redeploy - Updated with full demo interface
 import { useState, useEffect } from 'react'
-import { 
-  Search, 
-  Download, 
-  Code, 
-  Palette, 
-  Settings, 
-  ExternalLink, 
-  Copy, 
+import {
+  Search,
+  Download,
+  Code,
+  Palette,
+  Settings,
+  ExternalLink,
+  Copy,
   CheckCircle
 } from 'lucide-react'
+import ThemeToggle from '@/components/ThemeToggle'
 
 // Type assertion for React 19 compatibility
 const IconPalette = Palette as React.FC<{ className?: string }>
@@ -91,11 +92,10 @@ export default function Home() {
     setResult(null)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': DEMO_API_KEY
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           url,
@@ -124,35 +124,85 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const colorRegex = /^(#([0-9a-fA-F]{3,8})|rgba?\(|hsla?\(|oklch\(|lab\(|lch\()/
+
+  function deriveColors(data: any): Record<string, string> {
+    if (!data) return {}
+    // Case 1: direct map
+    if (data.colors && typeof data.colors === 'object' && !Array.isArray(data.colors)) {
+      const entries = Object.entries(data.colors).filter(([, v]) => typeof v === 'string' && colorRegex.test(String(v)))
+      if (entries.length) return Object.fromEntries(entries)
+    }
+    // Case 2: tokens.colors array
+    const tokenArray = data.tokens?.colors
+    if (Array.isArray(tokenArray) && tokenArray.length) {
+      return Object.fromEntries(tokenArray.slice(0, 48).map((v: string, i: number) => [
+        `color-${String(i + 1).padStart(2, '0')}`,
+        v,
+      ]))
+    }
+    // Case 3: theme variables (light or dark)
+    const themeVars = (data.theme?.light ?? data.theme ?? {}) as Record<string, string>
+    const themed = Object.entries(themeVars)
+      .filter(([k, v]) => typeof v === 'string' && colorRegex.test(v) && /^(--|primary|secondary|accent|muted|foreground|background|border|ring|chart)/.test(k))
+      .slice(0, 48)
+    if (themed.length) return Object.fromEntries(themed)
+    // Case 4: parse CSS string for custom properties
+    if (typeof data.css === 'string') {
+      const matches = Array.from(data.css.matchAll(/--([a-z0-9-]+):\s*([^;]+);/gi))
+      const picked = matches
+        .map((m) => [`--${m[1]}`, m[2].trim()] as const)
+        .filter(([, v]) => colorRegex.test(v))
+        .slice(0, 48)
+      if (picked.length) return Object.fromEntries(picked)
+    }
+    // Case 5: colorAnalysis
+    const analysis = data?.colorAnalysis
+    if (Array.isArray(analysis) && analysis.length) {
+      return Object.fromEntries(analysis.slice(0, 48).map((c: any, i: number) => [
+        `color-${String(i + 1).padStart(2, '0')}`,
+        typeof c === 'string' ? c : c?.color,
+      ]).filter(([, v]) => typeof v === 'string' && colorRegex.test(v)))
+    }
+    return {}
+  }
+
   const formatResultDisplay = () => {
     if (!result) return ''
-    
+
     if (format === 'shadcn') {
       return result.data.css || JSON.stringify(result.data, null, 2)
     }
-    
+
     return JSON.stringify(result.data, null, 2)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-950">
       {/* Header */}
-      <header className="border-b bg-white/70 backdrop-blur-sm">
+      <header className="border-b bg-white/70 backdrop-blur-sm dark:bg-gray-900/70 dark:border-gray-800">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <IconPalette className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <IconPalette className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-400">
+                  Get-Site-Styles API
+                </h1>
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                Get-Site-Styles API
-              </h1>
+              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full dark:bg-green-900/40 dark:text-green-300">
+                LIVE DEMO
+              </span>
             </div>
-            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-              LIVE DEMO
-            </span>
+            {/* Theme toggle */}
+            {/**/}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* injected component */}
+            <ThemeToggle />
           </div>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 dark:text-gray-300">
             Extract design tokens from any website and convert them to your preferred format
           </p>
         </div>
@@ -162,7 +212,7 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Input Panel */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6 dark:bg-gray-900 dark:border-gray-800">
               <div className="flex items-center gap-2 mb-4">
                 <IconSearch className="w-5 h-5 text-blue-600" />
                 <h2 className="text-lg font-semibold">Website Analysis</h2>
@@ -170,20 +220,20 @@ export default function Home() {
 
               {/* URL Input */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Website URL</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Website URL</label>
                 <input
                   type="url"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 placeholder:text-gray-400"
                 />
                 <div className="flex flex-wrap gap-2">
                   {exampleUrls.map((exampleUrl) => (
                     <button
                       key={exampleUrl}
                       onClick={() => setUrl(exampleUrl)}
-                      className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors"
+                      className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                       {exampleUrl.replace('https://', '')}
                     </button>
@@ -193,7 +243,7 @@ export default function Home() {
 
               {/* Format Selection */}
               <div className="space-y-2 mt-4">
-                <label className="text-sm font-medium text-gray-700">Output Format</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Output Format</label>
                 <div className="space-y-2">
                   {formatOptions.map((option) => (
                     <label key={option.value} className="flex items-start gap-2 cursor-pointer">
@@ -207,7 +257,7 @@ export default function Home() {
                       />
                       <div>
                         <div className="font-medium text-sm">{option.label}</div>
-                        <div className="text-xs text-gray-500">{option.description}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{option.description}</div>
                       </div>
                     </label>
                   ))}
@@ -215,19 +265,19 @@ export default function Home() {
               </div>
 
               {/* Options */}
-              <div className="space-y-4 mt-6 pt-4 border-t">
+              <div className="space-y-4 mt-6 pt-4 border-t dark:border-gray-800">
                 <div className="flex items-center gap-2">
-                  <IconSettings className="w-4 h-4 text-gray-600" />
+                  <IconSettings className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                   <h3 className="font-medium text-sm">Options</h3>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Color Format</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Color Format</label>
                     <select
                       value={colorFormat}
                       onChange={(e) => setColorFormat(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                     >
                       {colorFormatOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -245,7 +295,7 @@ export default function Home() {
                         onChange={(e) => setCompact(e.target.checked)}
                         className="rounded"
                       />
-                      <span className="text-sm font-medium text-gray-700">Compact Output</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Compact Output</span>
                     </label>
                   </div>
                 </div>
@@ -274,14 +324,14 @@ export default function Home() {
 
           {/* Results Panel */}
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="bg-white rounded-lg shadow-sm border p-6 dark:bg-gray-900 dark:border-gray-800">
               <div className="flex items-center gap-2 mb-4">
                 <IconCode className="w-5 h-5 text-green-600" />
                 <h2 className="text-lg font-semibold">Results</h2>
               </div>
 
               {error && (
-                <div className="p-4 bg-red-50 text-red-700 rounded-md mb-4">
+                <div className="p-4 bg-red-50 text-red-700 rounded-md mb-4 dark:bg-red-900/30 dark:text-red-300">
                   <p className="font-medium">Error:</p>
                   <p className="text-sm">{error}</p>
                 </div>
@@ -298,7 +348,7 @@ export default function Home() {
                     </div>
                     <button
                       onClick={() => copyToClipboard(formatResultDisplay())}
-                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
+                      className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                     >
                       {copied ? <IconCheckCircle className="w-4 h-4 text-green-600" /> : <IconCopy className="w-4 h-4" />}
                       {copied ? 'Copied!' : 'Copy'}
@@ -310,32 +360,37 @@ export default function Home() {
                   </div>
 
                   {/* Color Preview */}
-                  {result.data?.colors && (
-                    <div className="mt-4">
-                      <h4 className="font-medium text-sm mb-2">Color Palette Preview</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(result.data.colors).slice(0, 12).map(([name, value]) => (
-                          <div key={name} className="flex flex-col items-center">
-                            <div
-                              className="w-8 h-8 rounded border shadow-sm"
-                              style={{ backgroundColor: String(value) }}
-                              title={`${name}: ${String(value)}`}
-                            />
-                            <span className="text-xs text-gray-600 mt-1 max-w-16 truncate">
-                              {name}
-                            </span>
-                          </div>
-                        ))}
+                  {(() => {
+                    const palette = deriveColors(result.data)
+                    const entries = Object.entries(palette).slice(0, 24)
+                    if (!entries.length) return null
+                    return (
+                      <div className="mt-4">
+                        <h4 className="font-medium text-sm mb-2">Color Palette Preview</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {entries.map(([name, value]) => (
+                            <div key={name} className="flex flex-col items-center">
+                              <div
+                                className="w-8 h-8 rounded border shadow-sm"
+                                style={{ backgroundColor: String(value) }}
+                                title={`${name}: ${String(value)}`}
+                              />
+                              <span className="text-xs text-gray-600 dark:text-gray-400 mt-1 max-w-16 truncate">
+                                {name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )
+                  })()}
                 </div>
               )}
 
               {!result && !loading && !error && (
                 <div className="text-center py-12">
                   <IconPalette className="w-12 h-12 mb-4 text-gray-300 mx-auto" />
-                  <p className="text-gray-500 mb-2">No analysis yet</p>
+                  <p className="text-gray-500 mb-2 dark:text-gray-400">No analysis yet</p>
                   <p className="text-sm text-gray-400">
                     Enter a URL and click &quot;Analyze Website&quot; to extract design tokens
                   </p>
