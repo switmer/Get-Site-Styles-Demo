@@ -118,10 +118,50 @@ export default function Home() {
     }
   }
 
+  // Robust clipboard copy with fallbacks
   const copyToClipboard = async (text: string) => {
-    await navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    // Legacy fallback using a temporary textarea
+    const legacyCopy = () => {
+      try {
+        const textarea = document.createElement('textarea')
+        textarea.value = text
+        textarea.setAttribute('readonly', '')
+        textarea.style.position = 'fixed'
+        textarea.style.top = '-9999px'
+        document.body.appendChild(textarea)
+        textarea.focus()
+        textarea.select()
+        const ok = document.execCommand('copy')
+        document.body.removeChild(textarea)
+        return ok
+      } catch {
+        return false
+      }
+    }
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text)
+      } else {
+        const ok = legacyCopy()
+        if (!ok) throw new Error('Copy blocked')
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (e) {
+      // Final manual fallback: select the content and ask user to press copy keys
+      try {
+        const range = document.createRange()
+        const pre = document.querySelector('pre')
+        if (pre && pre.firstChild) {
+          range.selectNodeContents(pre)
+          const sel = window.getSelection()
+          sel?.removeAllRanges()
+          sel?.addRange(range)
+        }
+      } catch {}
+      setError('Copy is blocked by your browser. Please press Ctrl/Cmd + C to copy the selected text.')
+    }
   }
 
   const colorRegex = /^(#([0-9a-fA-F]{3,8})|rgba?\(|hsla?\(|oklch\(|lab\(|lch\()/
