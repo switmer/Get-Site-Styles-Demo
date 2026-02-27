@@ -233,27 +233,76 @@ export default function Home() {
 
     // Extract from structured tokens
     if (data.tokens) {
+      // Handle colors with values/frequency structure
       if (data.tokens.colors) {
-        const cols = Array.isArray(data.tokens.colors)
-          ? Object.fromEntries(data.tokens.colors.map((c: string, i: number) => [`color-${i + 1}`, c]))
-          : data.tokens.colors
-        Object.assign(tokens.colors, cols)
+        if (data.tokens.colors.values && Array.isArray(data.tokens.colors.values)) {
+          Object.assign(tokens.colors, Object.fromEntries(
+            data.tokens.colors.values.map((c: string, i: number) => [`color-${i + 1}`, c])
+          ))
+        } else if (Array.isArray(data.tokens.colors)) {
+          Object.assign(tokens.colors, Object.fromEntries(
+            data.tokens.colors.map((c: string, i: number) => [`color-${i + 1}`, c])
+          ))
+        } else if (typeof data.tokens.colors === 'object') {
+          Object.assign(tokens.colors, data.tokens.colors)
+        }
       }
+
+      // Handle spacing with values/frequency structure
       if (data.tokens.spacing) {
-        const spac = Array.isArray(data.tokens.spacing)
-          ? Object.fromEntries(data.tokens.spacing.map((s: string, i: number) => [`spacing-${i + 1}`, s]))
-          : data.tokens.spacing
-        Object.assign(tokens.spacing, spac)
+        if (data.tokens.spacing.values && Array.isArray(data.tokens.spacing.values)) {
+          Object.assign(tokens.spacing, Object.fromEntries(
+            data.tokens.spacing.values.map((s: string, i: number) => [`spacing-${i + 1}`, s])
+          ))
+        } else if (Array.isArray(data.tokens.spacing)) {
+          Object.assign(tokens.spacing, Object.fromEntries(
+            data.tokens.spacing.map((s: string, i: number) => [`spacing-${i + 1}`, s])
+          ))
+        } else if (typeof data.tokens.spacing === 'object') {
+          Object.assign(tokens.spacing, data.tokens.spacing)
+        }
       }
+
+      // Handle font sizes
+      if (data.tokens.fontSizes) {
+        if (data.tokens.fontSizes.values && Array.isArray(data.tokens.fontSizes.values)) {
+          Object.assign(tokens.typography, Object.fromEntries(
+            data.tokens.fontSizes.values.map((f: string, i: number) => [`font-size-${i + 1}`, f])
+          ))
+        }
+      }
+
+      // Handle typography
       if (data.tokens.typography) {
-        Object.entries(data.tokens.typography).forEach(([key, value]) => {
-          tokens.typography[key] = tokenValueToString(value)
-        })
+        if (typeof data.tokens.typography === 'object' && !Array.isArray(data.tokens.typography)) {
+          Object.entries(data.tokens.typography).forEach(([key, value]) => {
+            tokens.typography[key] = tokenValueToString(value)
+          })
+        }
       }
+
+      // Handle border radius
+      if (data.tokens.radii) {
+        if (data.tokens.radii.values && Array.isArray(data.tokens.radii.values)) {
+          Object.assign(tokens.radii, Object.fromEntries(
+            data.tokens.radii.values.map((r: string, i: number) => [`radius-${i + 1}`, r])
+          ))
+        } else if (typeof data.tokens.radii === 'object' && !Array.isArray(data.tokens.radii)) {
+          Object.assign(tokens.radii, data.tokens.radii)
+        }
+      }
+
+      // Handle shadows
       if (data.tokens.shadows) {
-        Object.entries(data.tokens.shadows).forEach(([key, value]) => {
-          tokens.shadows[key] = tokenValueToString(value)
-        })
+        if (data.tokens.shadows.values && Array.isArray(data.tokens.shadows.values)) {
+          Object.assign(tokens.shadows, Object.fromEntries(
+            data.tokens.shadows.values.map((s: string, i: number) => [`shadow-${i + 1}`, s])
+          ))
+        } else if (typeof data.tokens.shadows === 'object' && !Array.isArray(data.tokens.shadows)) {
+          Object.entries(data.tokens.shadows).forEach(([key, value]) => {
+            tokens.shadows[key] = tokenValueToString(value)
+          })
+        }
       }
     }
 
