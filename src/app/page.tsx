@@ -140,6 +140,14 @@ export default function Home() {
 
   const colorRegex = /^(#([0-9a-fA-F]{3,8})|rgba?\(|hsla?\(|oklch\(|lab\(|lch\()/
 
+  const tokenValueToString = (val: any): string => {
+    if (typeof val === 'string') return val
+    if (typeof val === 'number') return String(val)
+    if (val && typeof val === 'object' && val.value) return String(val.value)
+    if (val && typeof val === 'object') return JSON.stringify(val)
+    return String(val)
+  }
+
   const extractColors = (data: any): Array<[string, string]> => {
     if (!data) return []
     if (data.colors && typeof data.colors === 'object' && !Array.isArray(data.colors)) {
@@ -238,10 +246,14 @@ export default function Home() {
         Object.assign(tokens.spacing, spac)
       }
       if (data.tokens.typography) {
-        Object.assign(tokens.typography, data.tokens.typography)
+        Object.entries(data.tokens.typography).forEach(([key, value]) => {
+          tokens.typography[key] = tokenValueToString(value)
+        })
       }
       if (data.tokens.shadows) {
-        Object.assign(tokens.shadows, data.tokens.shadows)
+        Object.entries(data.tokens.shadows).forEach(([key, value]) => {
+          tokens.shadows[key] = tokenValueToString(value)
+        })
       }
     }
 
@@ -461,15 +473,17 @@ export default function Home() {
                 <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 p-8">
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Typography Tokens ({Object.keys(allTokens.typography).length})</h3>
                   <div className="space-y-3">
-                    {Object.entries(allTokens.typography).slice(0, 16).map(([name, value]) => (
+                    {Object.entries(allTokens.typography).slice(0, 16).map(([name, value]) => {
+                      const valStr = tokenValueToString(value)
+                      return (
                       <div
                         key={name}
                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group"
-                        onClick={() => copyToClipboard(`${value}`, `typo-${name}`)}
+                        onClick={() => copyToClipboard(valStr, `typo-${name}`)}
                       >
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{name}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{String(value).substring(0, 40)}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{valStr.substring(0, 40)}</p>
                         </div>
                         {copied === `typo-${name}` ? (
                           <IconCheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 ml-4" />
@@ -477,7 +491,8 @@ export default function Home() {
                           <IconCopy className="w-5 h-5 text-gray-400 dark:text-gray-500 ml-4 group-hover:text-gray-600 dark:group-hover:text-gray-300" />
                         )}
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               </div>
@@ -489,16 +504,18 @@ export default function Home() {
                 <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 p-8">
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Spacing Tokens ({Object.keys(allTokens.spacing).length})</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(allTokens.spacing).slice(0, 24).map(([name, value]) => (
+                    {Object.entries(allTokens.spacing).slice(0, 24).map(([name, value]) => {
+                      const valStr = tokenValueToString(value)
+                      return (
                       <div
                         key={name}
                         className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group"
-                        onClick={() => copyToClipboard(`${value}`, `spacing-${name}`)}
+                        onClick={() => copyToClipboard(valStr, `spacing-${name}`)}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div>
                             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{name}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{value}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{valStr}</p>
                           </div>
                           {copied === `spacing-${name}` ? (
                             <IconCheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -508,10 +525,11 @@ export default function Home() {
                         </div>
                         <div
                           className="h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
-                          style={{ width: `${Math.min(parseInt(String(value)) || 10, 100)}px` }}
+                          style={{ width: `${Math.min(parseInt(valStr) || 10, 100)}px` }}
                         />
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               </div>
@@ -523,23 +541,26 @@ export default function Home() {
                 <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 p-8">
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Border Radius Tokens ({Object.keys(allTokens.radii).length})</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {Object.entries(allTokens.radii).slice(0, 16).map(([name, value]) => (
+                    {Object.entries(allTokens.radii).slice(0, 16).map(([name, value]) => {
+                      const valStr = tokenValueToString(value)
+                      return (
                       <div
                         key={name}
                         className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group"
-                        onClick={() => copyToClipboard(`${value}`, `radius-${name}`)}
+                        onClick={() => copyToClipboard(valStr, `radius-${name}`)}
                       >
                         <div
                           className="w-16 h-16 mx-auto mb-3 bg-blue-500 border-2 border-gray-300 dark:border-gray-600"
-                          style={{ borderRadius: String(value) }}
+                          style={{ borderRadius: valStr }}
                         />
                         <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{value}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{valStr}</p>
                         {copied === `radius-${name}` && (
                           <p className="text-xs text-green-600 dark:text-green-400 font-semibold mt-1">✓</p>
                         )}
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               </div>
@@ -551,23 +572,26 @@ export default function Home() {
                 <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 p-8">
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Shadow Tokens ({Object.keys(allTokens.shadows).length})</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(allTokens.shadows).slice(0, 12).map(([name, value]) => (
+                    {Object.entries(allTokens.shadows).slice(0, 12).map(([name, value]) => {
+                      const valStr = tokenValueToString(value)
+                      return (
                       <div
                         key={name}
                         className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer group"
-                        onClick={() => copyToClipboard(`${value}`, `shadow-${name}`)}
+                        onClick={() => copyToClipboard(valStr, `shadow-${name}`)}
                       >
                         <div
                           className="w-full h-20 rounded-lg bg-white dark:bg-gray-700 mb-3"
-                          style={{ boxShadow: String(value) }}
+                          style={{ boxShadow: valStr }}
                         />
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate">{String(value).substring(0, 40)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate">{valStr.substring(0, 40)}</p>
                         {copied === `shadow-${name}` && (
                           <p className="text-xs text-green-600 dark:text-green-400 font-semibold mt-1">✓</p>
                         )}
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               </div>
