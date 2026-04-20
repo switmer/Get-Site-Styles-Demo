@@ -15,7 +15,7 @@ export default function ThemeToggle() {
       const initial = stored === "dark" || (!stored && prefersDark) ? "dark" : "light";
       setTheme(initial);
       document.documentElement.classList.toggle("dark", initial === "dark");
-    } catch (_) {
+    } catch {
       // no-op
     }
   }, []);
@@ -25,7 +25,7 @@ export default function ThemeToggle() {
     setTheme(next);
     try {
       localStorage.setItem("theme", next);
-    } catch (_) {
+    } catch {
       // no-op
     }
     document.documentElement.classList.toggle("dark", next === "dark");

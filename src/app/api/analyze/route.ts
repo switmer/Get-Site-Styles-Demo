@@ -45,11 +45,11 @@ export async function POST(req: Request) {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err: any) {
+  } catch (err) {
     // Network/timeout – also fall back
     const fallback = await loadSample(url, { format, colorFormat, compact }, {
       reason: "network_error",
-      message: err?.message ?? "Unknown error",
+      message: (err as Error)?.message ?? "Unknown error",
     });
     return NextResponse.json(fallback, { status: 200 });
   }
@@ -63,7 +63,7 @@ async function safeJson(req: Request) {
   }
 }
 
-async function loadSample(url: string, opts: any, meta: Record<string, unknown>) {
+async function loadSample(url: string, opts: Record<string, unknown>, meta: Record<string, unknown>) {
   const file = path.join(process.cwd(), "public", "sample-analysis.json");
   try {
     const raw = await fs.readFile(file, "utf8");
@@ -87,10 +87,10 @@ async function loadSample(url: string, opts: any, meta: Record<string, unknown>)
       input: { url, ...opts },
       meta: { source: "local-sample", ...sample?.meta, fallback: meta },
     };
-  } catch (e: any) {
+  } catch (e) {
     return {
       error: "Fallback sample missing",
-      message: e?.message ?? String(e),
+      message: (e as Error)?.message ?? String(e),
     };
   }
 }
