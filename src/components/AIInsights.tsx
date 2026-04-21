@@ -1,23 +1,32 @@
 import React from 'react';
 import { SparklesIcon, AlertTriangleIcon, CheckCircleIcon, InfoIcon, LightbulbIcon } from 'lucide-react';
 
+type FrequencyEntry = { value: string; count: number; prevalence: number };
+type TokenField =
+  | string[]
+  | { values?: string[]; frequency?: FrequencyEntry[] }
+  | undefined;
+
 interface AIInsightsProps {
   analysisData: {
     data?: {
       tokens?: {
-        colors?: {
-          frequency?: Array<{ value: string; count: number; prevalence: number }>;
-        };
-        fontFamilies?: {
-          frequency?: Array<{ value: string; count: number; prevalence: number }>;
-        };
-        spacing?: {
-          frequency?: Array<{ value: string; count: number; prevalence: number }>;
-        };
+        colors?: TokenField;
+        fontFamilies?: TokenField;
+        spacing?: TokenField;
         customProperties?: Record<string, unknown>;
       };
     };
   } | null;
+}
+
+// Handle both shadcn (flat array) and json (object with frequency) shapes.
+function fieldCount(field: TokenField): number {
+  if (!field) return 0;
+  if (Array.isArray(field)) return field.length;
+  if (field.frequency) return field.frequency.length;
+  if (field.values) return field.values.length;
+  return 0;
 }
 
 // Generate insights based on actual analysis data
@@ -25,7 +34,7 @@ const generateInsights = (data: AIInsightsProps['analysisData']) => {
   const insights = [];
   
   // Color analysis
-  const colorCount = data?.data?.tokens?.colors?.frequency?.length || 0;
+  const colorCount = fieldCount(data?.data?.tokens?.colors);
   if (colorCount > 50) {
     insights.push({
       type: 'warning',
@@ -81,7 +90,7 @@ const generateInsights = (data: AIInsightsProps['analysisData']) => {
   }
 
   // Typography analysis
-  const fontFamilyCount = data?.data?.tokens?.fontFamilies?.frequency?.length || 0;
+  const fontFamilyCount = fieldCount(data?.data?.tokens?.fontFamilies);
   if (fontFamilyCount > 10) {
     insights.push({
       type: 'warning',
@@ -101,7 +110,7 @@ const generateInsights = (data: AIInsightsProps['analysisData']) => {
   }
 
   // Spacing analysis
-  const spacingCount = data?.data?.tokens?.spacing?.frequency?.length || 0;
+  const spacingCount = fieldCount(data?.data?.tokens?.spacing);
   if (spacingCount > 30) {
     insights.push({
       type: 'warning',
@@ -190,19 +199,19 @@ const AIInsights: React.FC<AIInsightsProps> = ({ analysisData }) => {
           <div className="bg-white dark:bg-gray-800 rounded p-3">
             <div className="font-medium text-green-600 dark:text-green-400">Color System</div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              {analysisData.data?.tokens?.colors?.frequency?.length || 0} unique colors
+              {fieldCount(analysisData.data?.tokens?.colors)} unique colors
             </div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded p-3">
             <div className="font-medium text-blue-600 dark:text-blue-400">Typography</div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              {analysisData.data?.tokens?.fontFamilies?.frequency?.length || 0} font families
+              {fieldCount(analysisData.data?.tokens?.fontFamilies)} font families
             </div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded p-3">
             <div className="font-medium text-purple-600 dark:text-purple-400">Spacing</div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
-              {analysisData.data?.tokens?.spacing?.frequency?.length || 0} spacing values
+              {fieldCount(analysisData.data?.tokens?.spacing)} spacing values
             </div>
           </div>
         </div>
